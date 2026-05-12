@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# --- Aesthetic Header ---
+echo -e "\e[34m"
+echo "-------------------------------------------------------"
+echo "   🚀 NOVADRIVERS v0.2: SYSTEM DEEP SCAN             "
+echo "-------------------------------------------------------"
+echo -e "\e[0m"
+
+# 1. GPU Detection (The Heavy Hitter)
+check_gpu() {
+    echo -e "\e[1;32m[+] Scanning Graphics Hardware...\e[0m"
+    gpu=$(lspci | grep -E "VGA|3D")
+    echo "    Found: $gpu"
+    if [[ $gpu == *"NVIDIA"* ]]; then
+        echo "    💡 Suggestion: nvidia nvidia-utils nvidia-settings"
+    elif [[ $gpu == *"AMD"* ]]; then
+        echo "    💡 Suggestion: xf86-video-amdgpu vulkan-radeon"
+    fi
+}
+
+# 2. CPU Microcode (The "Invisible" Driver)
+# This fixes CPU bugs and security holes (Spectre/Meltdown)
+check_cpu() {
+    echo -e "\n\e[1;32m[+] Scanning CPU Microcode...\e[0m"
+    cpu=$(grep -m 1 "vendor_id" /proc/cpuinfo)
+    echo "    Found: $cpu"
+    if [[ $cpu == *"GenuineIntel"* ]]; then
+        echo "    💡 Suggestion: intel-ucode (Critical for system stability)"
+    elif [[ $cpu == *"AuthenticAMD"* ]]; then
+        echo "    💡 Suggestion: amd-ucode (Critical for system stability)"
+    fi
+}
+
+# 3. Audio & Bluetooth (The Essentials)
+check_peripherals() {
+    echo -e "\n\e[1;32m[+] Scanning Audio & Bluetooth...\e[0m"
+    
+    # Audio
+    audio=$(lspci | grep -i audio)
+    if [[ -n "$audio" ]]; then
+        echo "    Found Audio: $audio"
+        echo "    💡 Suggestion: pipewire pipewire-alsa pipewire-pulse"
+    fi
+
+    # Bluetooth
+    bt=$(lsusb | grep -i blue)
+    if [[ -n "$bt" ]]; then
+        echo "    Found Bluetooth: $bt"
+        echo "    💡 Suggestion: bluez bluez-utils (Enable with: systemctl enable bluetooth)"
+    else
+        echo "    Found Bluetooth: No internal USB device detected."
+    fi
+}
+
+# --- Execution ---
+check_gpu
+check_cpu
+check_peripherals
+
+echo -e "\n\e[34m-------------------------------------------------------\e[0m"
+echo "Scan Complete. Use 'novapkg install <package>' to add them!"
